@@ -1,0 +1,148 @@
+C51 COMPILER V9.60.7.0   MAIN                                                              07/20/2026 23:09:58 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Users\Sunny\AppData\Local\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEX
+                    -TEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <WS51F6240.H>
+   2          #include "intrins.h"
+   3          
+   4          //SYS FREQ
+   5          #define SYSFRQ 16000000
+   6          
+   7          //MUSIC BPM
+   8          #define BPS 2
+   9          
+  10          //TOTAL LENGTH OF NOTE TABLE
+  11          const uint32_t FPOS = 0;
+  12          
+  13          //NOTE 2 FREQ
+  14          const uint16_t code TONE_TABLE[] = {0};
+  15          
+  16          //CH FREQ
+  17          uint16_t CH1F = 0;
+  18          uint16_t CH2F = 0;
+  19          uint16_t CH3F = 0;
+  20          uint16_t CH4F = 0;
+  21          
+  22          //CH HDUTY
+  23          uint16_t CH1HD = 0;
+  24          uint16_t CH2HD = 0;
+  25          uint16_t CH3HD = 0;
+  26          uint16_t CH4HD = 0;
+  27          
+  28          //NOTE TABLE
+  29          const char code CH1T[] = {0};
+  30          const char code CH2T[] = {0};
+  31          const char code CH3T[] = {0};
+  32          const char code CH4T[] = {0};
+  33          
+  34          //DELAY US
+  35          void delayMicroseconds(unsigned long us) 
+  36          {unsigned long i;unsigned long usp;usp = us/8;for (i = 0; i < usp; i++){;}}
+  37            
+  38          //DELAY MS
+  39          void delay(unsigned int ms)
+  40          {delayMicroseconds(ms * 1000);}
+  41          
+  42          //SETUP PWM
+  43          void setupPWM() {
+  44   1        PWM0DIVL = 0xFF;
+  45   1        PWM0DIVH = 0x00;
+  46   1        PWM0DUTL = 0x00;
+  47   1        PWM0DUTH = 0x00;
+  48   1        
+  49   1        PWM1DIVL = 0xFF;
+  50   1        PWM1DIVH = 0x00;
+  51   1        PWM1DUTL = 0x00;
+  52   1        PWM1DUTH = 0x00;
+  53   1        
+  54   1        PWM2DIVL = 0xFF;
+C51 COMPILER V9.60.7.0   MAIN                                                              07/20/2026 23:09:58 PAGE 2   
+
+  55   1        PWM2DIVH = 0x00;
+  56   1        PWM2DUTL = 0x00;
+  57   1        PWM2DUTH = 0x00;
+  58   1        
+  59   1        PWM3DIVL = 0xFF;
+  60   1        PWM3DIVH = 0x00;
+  61   1        PWM3DUTL = 0x00;
+  62   1        PWM3DUTH = 0x00;
+  63   1        
+  64   1        PWMRUN = 0x0F;
+  65   1        PWM0PS = 0x09;
+  66   1        PWM1PS = 0x0A;
+  67   1        PWM2PS = 0x0B;
+  68   1        PWM3PS = 0x0C;
+  69   1      }
+  70          
+  71          void setFreq(uint32_t CPOS){
+  72   1        CH1F = SYSFRQ / TONE_TABLE[CH1T[CPOS]];
+  73   1        CH2F = SYSFRQ / TONE_TABLE[CH2T[CPOS]];
+  74   1        CH3F = SYSFRQ / TONE_TABLE[CH3T[CPOS]];
+  75   1        CH4F = SYSFRQ / TONE_TABLE[CH4T[CPOS]];
+  76   1        CH1HD = CH1F / 2;
+  77   1        CH2HD = CH2F / 2;
+  78   1        CH3HD = CH3F / 2;
+  79   1        CH4HD = CH4F / 2;
+  80   1        
+  81   1        //*high = (uint8_t)(input >> 8);
+  82   1        //*low  = (uint8_t)(input & 0xFF);
+  83   1        PWM0DIVL = (uint8_t)(CH1F & 0xFF);
+  84   1        PWM0DIVH = (uint8_t)(CH1F >> 8);
+  85   1        PWM0DUTL = (uint8_t)(CH1HD & 0xFF);
+  86   1        PWM0DUTH = (uint8_t)(CH1HD >> 8);
+  87   1        
+  88   1        PWM1DIVL = (uint8_t)(CH2F & 0xFF);
+  89   1        PWM1DIVH = (uint8_t)(CH2F >> 8);
+  90   1        PWM1DUTL = (uint8_t)(CH2HD & 0xFF);
+  91   1        PWM1DUTH = (uint8_t)(CH2HD >> 8);
+  92   1        
+  93   1        PWM2DIVL = (uint8_t)(CH3F & 0xFF);
+  94   1        PWM2DIVH = (uint8_t)(CH3F >> 8);
+  95   1        PWM2DUTL = (uint8_t)(CH3HD & 0xFF);
+  96   1        PWM2DUTH = (uint8_t)(CH3HD >> 8);
+  97   1        
+  98   1        PWM3DIVL = (uint8_t)(CH4F & 0xFF);
+  99   1        PWM3DIVH = (uint8_t)(CH4F >> 8);
+ 100   1        PWM3DUTL = (uint8_t)(CH4HD & 0xFF);
+ 101   1        PWM3DUTH = (uint8_t)(CH4HD >> 8);
+ 102   1      }
+ 103          
+ 104          void playMusic() {
+ 105   1        uint32_t i;
+ 106   1        for (i = 0;i < FPOS;i++){
+ 107   2          delay(1000 / BPS);
+ 108   2          setFreq(i);
+ 109   2        }
+ 110   1      }
+ 111          
+ 112          void main(){
+ 113   1        SCCON = 0x00; //16MHz RC
+ 114   1        setupPWM(); //Reset PWM register
+ 115   1        P11F = 0x03; //CH1 PINMODE
+ 116   1        P12F = 0x03; //CH2 PINMODE
+C51 COMPILER V9.60.7.0   MAIN                                                              07/20/2026 23:09:58 PAGE 3   
+
+ 117   1        P13F = 0x03; //CH3 PINMODE
+ 118   1        P14F = 0x03; //CH4 PINMODE
+ 119   1        playMusic();
+ 120   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    610    ----
+   CONSTANT SIZE    =      6    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     20      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
